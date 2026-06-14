@@ -3,6 +3,7 @@
 # install udev rules for scyrox
 # the web configurator needs this for WebHID/WebUSB
 #
+# curl -fsSL https://install.aidre.tech/scyrox.sh | sudo bash
 #
 
 set -euo pipefail
@@ -31,9 +32,20 @@ main() {
     fi
 
     # make sure we can elevate
-    if [[ "$EUID" -ne 0 ]] && ! sudo -n true 2>/dev/null; then
-        echo "Need root or passwordless sudo." >&2
-        return 1
+    if [[ "$EUID" -ne 0 ]]; then
+        if ! sudo -n true 2>/dev/null; then
+            cat >&2 <<'ERR'
+This script needs root privileges.
+
+Run one of these:
+  curl -fsSL https://install.aidre.tech/scyrox.sh | sudo bash
+
+Or download first:
+  curl -fsSL https://install.aidre.tech/scyrox.sh -o scyrox.sh
+  sudo bash scyrox.sh
+ERR
+            return 1
+        fi
     fi
 
     TMP=$(mktemp)
