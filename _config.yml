@@ -1,0 +1,9 @@
+title: install
+description: One-line installers
+highlighter: none
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      layout: "default"
