@@ -135,6 +135,10 @@
             border-radius: 2px;
         }
 
+        pre, div.highlight {
+            position: relative;
+        }
+
         pre {
             border: 1px solid var(--pencil);
             padding: 16px;
@@ -177,6 +181,41 @@
             padding: 0;
         }
 
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--paper);
+            border: 1px solid var(--pencil);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--ink);
+            padding: 0;
+            transition: color 150ms var(--ease), border-color 150ms var(--ease);
+        }
+
+        .copy-btn:hover {
+            color: var(--graphite);
+            border-color: var(--graphite);
+        }
+
+        .copy-btn:focus-visible {
+            outline: 1px solid var(--pencil);
+            outline-offset: 2px;
+        }
+
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+            pointer-events: none;
+        }
+
         @media (max-width: 640px) {
             .shell {
                 grid-template-columns: 1fr;
@@ -189,7 +228,7 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            li a {
+            li a, .copy-btn {
                 transition: none;
             }
         }
@@ -205,5 +244,41 @@
             {{ content }}
         </main>
     </div>
+
+    <script>
+        const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="m13,7h2c1.105,0,2,.895,2,2v6c0,1.105-.895,2-2,2h-6c-1.105,0-2-.895-2-2v-2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><rect x="3" y="3" width="10" height="10" rx="2" ry="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></rect></svg>`;
+
+        const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><polyline points="4 11 8 15 16 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline></svg>`;
+
+        const blocks = [];
+        document.querySelectorAll('div.highlight').forEach(el => blocks.push(el));
+        document.querySelectorAll('pre').forEach(el => {
+            if (!el.closest('div.highlight')) blocks.push(el);
+        });
+
+        blocks.forEach(block => {
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.setAttribute('aria-label', 'Copy code');
+            btn.setAttribute('title', 'Copy');
+            btn.innerHTML = COPY_ICON;
+
+            btn.addEventListener('click', async () => {
+                const code = block.querySelector('code');
+                const text = code ? code.innerText : block.innerText;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    btn.innerHTML = CHECK_ICON;
+                    setTimeout(() => {
+                        btn.innerHTML = COPY_ICON;
+                    }, 2000);
+                } catch (e) {
+                    // silent fail
+                }
+            });
+
+            block.appendChild(btn);
+        });
+    </script>
 </body>
 </html>
